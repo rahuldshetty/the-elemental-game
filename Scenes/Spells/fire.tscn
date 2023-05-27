@@ -1,6 +1,7 @@
-[gd_scene load_steps=8 format=3 uid="uid://d3xfv684fgh72"]
+[gd_scene load_steps=9 format=3 uid="uid://d3xfv684fgh72"]
 
 [ext_resource type="Texture2D" uid="uid://dg02k4iv5m2x7" path="res://Sprites/spells/Firebolt SpriteSheet.png" id="1_2htjs"]
+[ext_resource type="Script" path="res://Scripts/Spells/Fire.gd" id="1_cjnbx"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_3q7i0"]
 atlas = ExtResource("1_2htjs")
@@ -41,12 +42,14 @@ animations = [{
 [sub_resource type="CircleShape2D" id="CircleShape2D_i7sbc"]
 radius = 24.0832
 
-[node name="Fire" type="RigidBody2D"]
+[node name="Fire" type="Area2D"]
+script = ExtResource("1_cjnbx")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 position = Vector2(-5, -5)
 sprite_frames = SubResource("SpriteFrames_ka5d2")
-frame_progress = 0.643926
+autoplay = "default"
+frame_progress = 0.870382
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0, 1)
