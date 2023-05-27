@@ -1,0 +1,31 @@
+[gd_scene load_steps=5 format=3 uid="uid://bhtgce7edpx7v"]
+
+[ext_resource type="Texture2D" uid="uid://b5p7h04vghbjb" path="res://Sprites/gui/Red potions/poç¦o vermelha.png" id="1_h54o8"]
+[ext_resource type="Script" path="res://Scripts/HP_Potion.gd" id="2_s1c23"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_70o20"]
+atlas = ExtResource("1_h54o8")
+region = Rect2(0, 0, 48, 48)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_uqdig"]
+radius = 10.0
+
+[node name="HPPotion" type="Sprite2D"]
+z_index = 8
+scale = Vector2(0.8, 0.8)
+texture = SubResource("AtlasTexture_70o20")
+hframes = 3
+vframes = 3
+script = ExtResource("2_s1c23")
+
+[node name="Area2D" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
+shape = SubResource("CircleShape2D_uqdig")
+
+[node name="AnimationTimer" type="Timer" parent="."]
+wait_time = 0.2
+autostart = true
+
+[connection signal="body_entered" from="Area2D" to="." method="_on_area_2d_body_entered"]
+[connection signal="timeout" from="AnimationTimer" to="." method="_on_animation_timer_timeout"]

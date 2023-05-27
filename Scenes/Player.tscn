@@ -1,8 +1,11 @@
-[gd_scene load_steps=20 format=3 uid="uid://cit16souudw4g"]
+[gd_scene load_steps=35 format=3 uid="uid://cit16souudw4g"]
 
 [ext_resource type="Script" path="res://Scripts/Player.gd" id="1_3k0ro"]
 [ext_resource type="Texture2D" uid="uid://dk6i2qtt30v17" path="res://Sprites/blue_witch/B_witch_idle.png" id="1_yrakr"]
 [ext_resource type="Texture2D" uid="uid://dk7n3gdskp0uk" path="res://Sprites/blue_witch/B_witch_run.png" id="3_d54lj"]
+[ext_resource type="Texture2D" uid="uid://cbwysr46msphu" path="res://Sprites/gui/GUI.png" id="4_0fx2v"]
+[ext_resource type="Texture2D" uid="uid://bjti1ypofpu2k" path="res://Sprites/blue_witch/B_witch_charge.png" id="4_6av8i"]
+[ext_resource type="FontFile" uid="uid://cxt6sqemyvl3v" path="res://Fonts/monogram-extended.ttf" id="5_i4o17"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_4hp8v"]
 atlas = ExtResource("1_yrakr")
@@ -60,6 +63,26 @@ region = Rect2(0, 288, 32, 48)
 atlas = ExtResource("3_d54lj")
 region = Rect2(0, 336, 32, 48)
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_yw2lk"]
+atlas = ExtResource("4_6av8i")
+region = Rect2(0, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_voj6p"]
+atlas = ExtResource("4_6av8i")
+region = Rect2(0, 48, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vfn3n"]
+atlas = ExtResource("4_6av8i")
+region = Rect2(0, 96, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sdwu8"]
+atlas = ExtResource("4_6av8i")
+region = Rect2(0, 144, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vtq3p"]
+atlas = ExtResource("4_6av8i")
+region = Rect2(0, 192, 48, 48)
+
 [sub_resource type="SpriteFrames" id="SpriteFrames_nxi7l"]
 animations = [{
 "frames": [{
@@ -113,18 +136,66 @@ animations = [{
 "loop": true,
 "name": &"run",
 "speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yw2lk")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_voj6p")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vfn3n")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sdwu8")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vtq3p")
+}],
+"loop": true,
+"name": &"spell",
+"speed": 5.0
 }]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_tovs2"]
 size = Vector2(15, 23)
 
-[node name="Player" type="CharacterBody2D"]
+[sub_resource type="AtlasTexture" id="AtlasTexture_qdk6y"]
+atlas = ExtResource("4_0fx2v")
+region = Rect2(134.944, 20.3505, 52.0253, 6.35114)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_drs4y"]
+atlas = ExtResource("4_0fx2v")
+region = Rect2(71.6759, 21.9382, 49.3227, 3.108)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_tmunj"]
+atlas = ExtResource("4_0fx2v")
+region = Rect2(134.945, 4.02071, 45.3363, 6.68897)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2nmj0"]
+atlas = ExtResource("4_0fx2v")
+region = Rect2(71.729, 5.68319, 42.2148, 3.56745)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_j6wsa"]
+atlas = ExtResource("4_0fx2v")
+region = Rect2(96.1736, 36.1212, 25.5667, 23.9316)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_n450r"]
+atlas = ExtResource("1_yrakr")
+region = Rect2(3.51169, 7.24262, 22.8371, 19.9993)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_47by2"]
+atlas = ExtResource("4_0fx2v")
+region = Rect2(121.431, 48.7289, 38.242, 10.9456)
+
+[node name="Player" type="CharacterBody2D" groups=["player"]]
 z_index = 10
 script = ExtResource("1_3k0ro")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_nxi7l")
-animation = &"run"
+animation = &"idle"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(-0.5, 6.5)
@@ -134,3 +205,87 @@ shape = SubResource("RectangleShape2D_tovs2")
 zoom = Vector2(3, 3)
 process_callback = 0
 position_smoothing_enabled = true
+
+[node name="PlayerHUD" type="CanvasLayer" parent="."]
+visible = false
+
+[node name="HPBar" type="TextureProgressBar" parent="PlayerHUD"]
+offset_left = 95.0
+offset_top = 16.0
+offset_right = 147.0
+offset_bottom = 22.0
+scale = Vector2(4, 4)
+value = 100.0
+texture_under = SubResource("AtlasTexture_qdk6y")
+texture_progress = SubResource("AtlasTexture_drs4y")
+texture_progress_offset = Vector2(1, 1.5)
+
+[node name="ManaBar" type="TextureProgressBar" parent="PlayerHUD"]
+offset_left = 96.0
+offset_top = 42.0
+offset_right = 141.0
+offset_bottom = 49.0
+scale = Vector2(4, 4)
+value = 100.0
+texture_under = SubResource("AtlasTexture_tmunj")
+texture_progress = SubResource("AtlasTexture_2nmj0")
+texture_progress_offset = Vector2(1, 1.5)
+
+[node name="Potrait" type="TextureRect" parent="PlayerHUD"]
+offset_left = 9.0
+offset_top = 12.0
+offset_right = 101.0
+offset_bottom = 114.0
+texture = SubResource("AtlasTexture_j6wsa")
+
+[node name="PotraitPic" type="TextureRect" parent="PlayerHUD/Potrait"]
+layout_mode = 0
+offset_left = 9.0
+offset_top = 22.0
+offset_right = 81.0
+offset_bottom = 93.0
+texture = SubResource("AtlasTexture_n450r")
+
+[node name="CoinBGHud" type="TextureRect" parent="PlayerHUD"]
+offset_left = 99.0
+offset_top = 69.0
+offset_right = 279.0
+offset_bottom = 113.0
+texture = SubResource("AtlasTexture_47by2")
+
+[node name="GoldLabel" type="Label" parent="PlayerHUD/CoinBGHud"]
+layout_mode = 0
+offset_left = 36.0
+offset_top = 6.0
+offset_right = 171.0
+offset_bottom = 38.0
+theme_override_fonts/font = ExtResource("5_i4o17")
+theme_override_font_sizes/font_size = 32
+text = "0"
+clip_text = true
+
+[node name="PlayerNotification" type="Label" parent="PlayerHUD"]
+visible = false
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -369.0
+offset_top = 16.0
+offset_right = -7.0
+offset_bottom = 135.0
+grow_horizontal = 0
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("5_i4o17")
+theme_override_font_sizes/font_size = 32
+text = "Player Notifcation...
+Player Notifcation...
+Player Notifcation...asd
+Player Notifcation..."
+autowrap_mode = 1
+text_overrun_behavior = 3
+
+[node name="PlayerNotificationTimer" type="Timer" parent="PlayerHUD/PlayerNotification"]
+wait_time = 1.4
+one_shot = true
+
+[connection signal="timeout" from="PlayerHUD/PlayerNotification/PlayerNotificationTimer" to="." method="_on_player_notification_timer_timeout"]
