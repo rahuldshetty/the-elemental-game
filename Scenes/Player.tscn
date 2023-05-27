@@ -1,4 +1,4 @@
-[gd_scene load_steps=35 format=3 uid="uid://cit16souudw4g"]
+[gd_scene load_steps=42 format=3 uid="uid://cit16souudw4g"]
 
 [ext_resource type="Script" path="res://Scripts/Player.gd" id="1_3k0ro"]
 [ext_resource type="Texture2D" uid="uid://dk6i2qtt30v17" path="res://Sprites/blue_witch/B_witch_idle.png" id="1_yrakr"]
@@ -6,6 +6,9 @@
 [ext_resource type="Texture2D" uid="uid://cbwysr46msphu" path="res://Sprites/gui/GUI.png" id="4_0fx2v"]
 [ext_resource type="Texture2D" uid="uid://bjti1ypofpu2k" path="res://Sprites/blue_witch/B_witch_charge.png" id="4_6av8i"]
 [ext_resource type="FontFile" uid="uid://cxt6sqemyvl3v" path="res://Fonts/monogram-extended.ttf" id="5_i4o17"]
+[ext_resource type="Texture2D" uid="uid://kawtr4ug4frn" path="res://Sprites/spell_gui/Spells/fire_spell.png" id="7_5ow7t"]
+[ext_resource type="Texture2D" uid="uid://coaf2chkfcm4w" path="res://Sprites/gui/#2 - Transparent Icons & Drop Shadow.png" id="7_tvxmu"]
+[ext_resource type="Texture2D" uid="uid://bmawntbpnhsfo" path="res://Sprites/spell_gui/Spells/ice_spell.png" id="8_avkua"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_4hp8v"]
 atlas = ExtResource("1_yrakr")
@@ -189,6 +192,22 @@ region = Rect2(3.51169, 7.24262, 22.8371, 19.9993)
 atlas = ExtResource("4_0fx2v")
 region = Rect2(121.431, 48.7289, 38.242, 10.9456)
 
+[sub_resource type="AtlasTexture" id="AtlasTexture_islay"]
+atlas = ExtResource("4_0fx2v")
+region = Rect2(49.7014, 97.675, 28.5125, 28.5125)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_pfamp"]
+atlas = ExtResource("7_tvxmu")
+region = Rect2(0, 580, 32, 28)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8t4gc"]
+atlas = ExtResource("7_tvxmu")
+region = Rect2(128, 580, 32, 28)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_1uc7y"]
+atlas = ExtResource("7_tvxmu")
+region = Rect2(68, 580, 32, 28)
+
 [node name="Player" type="CharacterBody2D" groups=["player"]]
 z_index = 10
 script = ExtResource("1_3k0ro")
@@ -207,7 +226,6 @@ process_callback = 0
 position_smoothing_enabled = true
 
 [node name="PlayerHUD" type="CanvasLayer" parent="."]
-visible = false
 
 [node name="HPBar" type="TextureProgressBar" parent="PlayerHUD"]
 offset_left = 95.0
@@ -288,8 +306,110 @@ text_overrun_behavior = 3
 wait_time = 1.4
 one_shot = true
 
+[node name="Control" type="Control" parent="PlayerHUD"]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="SpellHud1" type="TextureRect" parent="PlayerHUD/Control"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 1055.0
+offset_top = 561.0
+offset_right = 1120.0
+offset_bottom = 626.0
+grow_horizontal = 0
+grow_vertical = 0
+texture = SubResource("AtlasTexture_islay")
+
+[node name="Spell1" type="TextureRect" parent="PlayerHUD/Control/SpellHud1"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -29.5
+offset_top = -29.5
+offset_right = 29.5
+offset_bottom = 29.5
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("7_5ow7t")
+
+[node name="SpellHud2" type="TextureRect" parent="PlayerHUD/Control"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 1132.0
+offset_top = 561.0
+offset_right = 1197.0
+offset_bottom = 626.0
+grow_horizontal = 0
+grow_vertical = 0
+texture = SubResource("AtlasTexture_islay")
+
+[node name="Spell2" type="TextureRect" parent="PlayerHUD/Control/SpellHud2"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -29.5
+offset_top = -29.5
+offset_right = 30.5
+offset_bottom = 29.5
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("8_avkua")
+
 [node name="AudioListener2D" type="AudioListener2D" parent="."]
 current = true
+
+[node name="GamicHUD" type="Control" parent="."]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Orb1" type="TextureRect" parent="GamicHUD"]
+layout_mode = 0
+offset_left = -24.0
+offset_top = -9.0
+offset_right = -13.0
+offset_bottom = 1.0
+texture = SubResource("AtlasTexture_pfamp")
+expand_mode = 2
+
+[node name="Orb2" type="TextureRect" parent="GamicHUD"]
+layout_mode = 0
+offset_left = -8.0
+offset_top = -28.0
+offset_right = 3.0
+offset_bottom = -18.0
+texture = SubResource("AtlasTexture_8t4gc")
+expand_mode = 2
+
+[node name="Orb3" type="TextureRect" parent="GamicHUD"]
+layout_mode = 0
+offset_left = 11.0
+offset_top = -12.0
+offset_right = 22.0
+offset_bottom = -2.0
+texture = SubResource("AtlasTexture_1uc7y")
+expand_mode = 2
 
 [connection signal="animation_finished" from="AnimatedSprite2D" to="." method="_on_animated_sprite_2d_animation_finished"]
 [connection signal="timeout" from="PlayerHUD/PlayerNotification/PlayerNotificationTimer" to="." method="_on_player_notification_timer_timeout"]
