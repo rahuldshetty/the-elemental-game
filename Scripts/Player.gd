@@ -28,6 +28,11 @@ var notifications = []
 
 @onready var spell1:TextureRect = $PlayerHUD/Control/SpellHud1/Spell1
 @onready var spell2:TextureRect = $PlayerHUD/Control/SpellHud2/Spell2
+@onready var spell1TimerLabel:Label = $PlayerHUD/Control/SpellHud1/Spell1/Spell1TimerLabel
+@onready var spell2TimerLabel:Label = $PlayerHUD/Control/SpellHud2/Spell2/Spell2TimerLabel
+@onready var spell1Sweep:TextureProgressBar = $PlayerHUD/Control/SpellHud1/Spell1/Spell1Sweep
+@onready var spell2Sweep:TextureProgressBar = $PlayerHUD/Control/SpellHud2/Spell2/Spell2Sweep
+
 
 var selected_orbs:Array = []
 const MAX_ORBS = 3
@@ -67,20 +72,32 @@ const MAX_SPELS = 2
 
 var SPELLS = {
 	Vector3i(0,0,0) : {
-		"id": 0,
+		"id": Vector3i(0,0,0),
 		"name": "Fire Blast",
 		"icon": "Spells/fire_spell.png",
-		"orbs": [0,0,0],
 		"function": fire_blast,
-		"mana": 30
+		"mana": 30,
+		"dmg": 69,
+		"cd": 5,
+		"timer": create_timer(5),
+		"scene": preload("res://Scenes/Spells/fire_blast.tscn"),
+		"distance": 150
+	},
+	Vector3i(1, 1, 1) : {
+		"id": Vector3i(0,0,0),
+		"name": "Earthen Gaurd",
+		"icon": "Buffs/knockback_resistance.png",
+		"function": earten_gaurd,
+		"mana": 10,
+		"dmg": 0,
+		"cd": 3,
+		"timer": create_timer(3),
+		"scene": preload("res://Scenes/Spells/earthen_gaurd.tscn"),
+		"distance": 65
 	}
 }
 
 var casting_spell = false
-
-## Fire Blast
-@export var Fire_Blast_Scene: PackedScene
-const BLAST_OFF_DISTANCE:int = 150
 
 func _ready():
 	animation.play("idle")
@@ -90,6 +107,12 @@ func _ready():
 	orb1.visible = false
 	orb2.visible = false
 	orb3.visible = false
+	
+	spell1TimerLabel.visible = false
+	spell2TimerLabel.visible = false
+	
+	spell1Sweep.visible = false
+	spell2Sweep.visible = false
 	
 	spell1.visible =  false
 	spell2.visible = false
@@ -102,6 +125,23 @@ func init_player_stats():
 	update_health(-12)
 	update_mana(PLAYER_MAX_MANA)
 	update_gold(0)
+
+func create_timer(cd):
+	var timer = Timer.new()
+	timer.one_shot = true
+	timer.wait_time = cd
+	timer.process_callback = Timer.TIMER_PROCESS_IDLE
+	timer.connect("timeout",  _timer_callback)
+	add_child(timer)
+	return timer
+
+func get_spell_timer(idx):
+	if idx == 0 and len(select_spells) >= 1:
+		var key = select_spells[0]
+		return SPELLS[key]['timer']
+	if idx == 1 and len(select_spells) >= 2:
+		var key = select_spells[1]
+		return SPELLS[key]['timer']
 
 func update_health(value):
 	player_health += value
@@ -149,6 +189,8 @@ func _physics_process(_delta):
 	get_input()
 	move_and_slide()
 
+func _process(_delta):
+	draw_spell_timer_ui()
 
 # Notification Stuff
 func notify(message):
@@ -190,16 +232,16 @@ func add_orb(idx):
 
 func draw_spells():
 	if len(select_spells) >= 1:
-		spell1.texture = load(SPELL_ICON_PREFIX + select_spells[0]['icon'])
+		spell1.texture = load(SPELL_ICON_PREFIX + SPELLS[select_spells[0]]['icon'])
 		spell1.visible = true
 	if len(select_spells) >= 2:
-		spell2.texture = load(SPELL_ICON_PREFIX + select_spells[1]['icon'])
+		spell2.texture = load(SPELL_ICON_PREFIX + SPELLS[select_spells[1]]['icon'])
 		spell2.visible = true
 
-func add_spell(spell):
-	if spell in select_spells:
+func add_spell(id):
+	if id in select_spells:
 		return
-	select_spells.push_front(spell)
+	select_spells.push_front(id)
 	select_spells = select_spells.slice(0, MAX_SPELS)
 	draw_spells()
 
@@ -211,7 +253,7 @@ func fuse_element():
 			selected_orbs[2]['id']
 		)
 		if key in SPELLS:
-			add_spell(SPELLS[key])
+			add_spell(key)
 
 # Spells
 
@@ -234,34 +276,86 @@ func _input(event):
 		add_orb(4)
 	
 
-func cast_spell(idx):
+func cast_spell(idx):		
 	if len(select_spells) >= idx + 1:
-		var mana = select_spells[idx]['mana']
+		# Stop casting if timer is active
+		if (idx == 0 and get_spell_timer(0).time_left > 0) or (idx == 1 and get_spell_timer(1).time_left > 0):
+			return
+		
+		if idx == 0:
+			spell1TimerLabel.visible = true
+			spell1Sweep.visible = true
+		elif idx == 1:
+			spell2TimerLabel.visible = true
+			spell2Sweep.visible = true
+		
+		var mana = SPELLS[select_spells[idx]]['mana']
+		var cd = SPELLS[select_spells[idx]]['cd']
 		if player_mana >= mana:
 			update_mana(-mana)
-			(select_spells[idx]['function']).call()
+			start_spell_cd(cd, idx)
+			(SPELLS[select_spells[idx]]['function']).call()
 
 		
 func cast_spell_animation():
 	animation.play("spell")
 	casting_spell = true
 
-func fire_blast():
-	if Fire_Blast_Scene:
-		cast_spell_animation()
-		var blast:Area2D = Fire_Blast_Scene.instantiate()
-		blast.position = global_position
-		if is_player_facing_left():
-			blast.position.x -= BLAST_OFF_DISTANCE
-		else:
-			blast.position.x += BLAST_OFF_DISTANCE
-		get_parent().add_child(blast)
+func aoe_summon_spell(idx, flip_h=false, scale_value=Vector2(1, 1)):
+	var spell = SPELLS[idx]
+	var scene = spell['scene']
+	cast_spell_animation()
+	var aoe_spell:Area2D = scene.instantiate()
+	aoe_spell.position = global_position
+	if is_player_facing_left():
+		aoe_spell.position.x -= spell['distance']
+	else:
+		aoe_spell.position.x += spell['distance']
 		
+	if flip_h and is_player_facing_left():
+		aoe_spell.set_scale(scale_value)
+	
+	get_parent().add_child(aoe_spell)
 
+
+func fire_blast():
+	aoe_summon_spell(Vector3i(0,0,0))
+
+func earten_gaurd():
+	aoe_summon_spell(Vector3i(1,1,1), true, Vector2(-2, 2))
 
 func _on_animated_sprite_2d_animation_finished():
 	if casting_spell:
 		casting_spell = false
 		animation.play("idle")
+
+func start_spell_cd(cd, idx):
+	# since there are 2 timers
+	if idx >= 0 and idx <= 1:
+		var timer = get_spell_timer(0)
+		if idx == 1:
+			timer = get_spell_timer(1)
+		timer.start(cd)
+		
+
+func draw_spell_timer_ui():
+	if len(select_spells) >= 1 and get_spell_timer(0).time_left > 0:
+		spell1TimerLabel.text = "%3.1f" % get_spell_timer(0).time_left
+		var cd = SPELLS[select_spells[0]]['cd']
+		spell1Sweep.value = int((get_spell_timer(0).time_left / cd) * 100)
+		
+	if len(select_spells) >= 2 and get_spell_timer(1).time_left > 0:
+		spell2TimerLabel.text = "%3.1f" % get_spell_timer(1).time_left
+		var cd = SPELLS[select_spells[1]]['cd']
+		spell2Sweep.value = int((get_spell_timer(1).time_left / cd) * 100)
+	
+
+func _timer_callback():
+	if len(select_spells) >= 1 and get_spell_timer(0).time_left == 0:
+		spell1TimerLabel.visible = false
+		spell1Sweep.visible = false
+	if len(select_spells) >= 2 and get_spell_timer(1).time_left == 0:
+		spell2TimerLabel.visible = false
+		spell2Sweep.visible = false
 
 
