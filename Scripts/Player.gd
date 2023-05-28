@@ -5,7 +5,7 @@ const PLAYER_MAX_MANA:float = 100.0
 
 var input_direction:Vector2 = Vector2.ZERO;
 
-@export var player_speed:float = 100.0
+@export var player_speed:float = 180.0
 @export var player_health:float = 100.0
 @export var player_mana:float = 100
 @export var player_gold:int = 0
@@ -28,6 +28,8 @@ var notifications = []
 
 @onready var spell1:TextureRect = $PlayerHUD/Control/SpellHud1/Spell1
 @onready var spell2:TextureRect = $PlayerHUD/Control/SpellHud2/Spell2
+@onready var spell1Title:Label = $PlayerHUD/Control/SpellHud1/Spell1Title
+@onready var spell2Title:Label = $PlayerHUD/Control/SpellHud2/Spell2Title
 @onready var spell1TimerLabel:Label = $PlayerHUD/Control/SpellHud1/Spell1/Spell1TimerLabel
 @onready var spell2TimerLabel:Label = $PlayerHUD/Control/SpellHud2/Spell2/Spell2TimerLabel
 @onready var spell1Sweep:TextureProgressBar = $PlayerHUD/Control/SpellHud1/Spell1/Spell1Sweep
@@ -131,6 +133,18 @@ var SPELLS = {
 		"scene": preload("res://Scenes/Spells/water_splash.tscn"),
 		"distance": 86
 	},
+	Vector3i(2, 3, 4) : {
+		"id": Vector3i(2,3,4),
+		"name": "Spell Caster",
+		"icon": "Buffs/element_boost.png",
+		"function": spell_caster,
+		"mana": 25,
+		"dmg": 0,
+		"cd": 20,
+		"timer": create_timer(20),
+		"scene": null,
+		"distance": 0
+	},
 	Vector3i(4, 4, 4) : {
 		"id": Vector3i(3,3,3),
 		"name": "Death",
@@ -164,6 +178,9 @@ func _ready():
 	
 	spell1.visible =  false
 	spell2.visible = false
+	
+	spell1Title.visible = false
+	spell2Title.visible = false
 	
 	hud.visible = true
 	init_player_stats()
@@ -283,9 +300,13 @@ func draw_spells():
 	if len(select_spells) >= 1:
 		spell1.texture = load(SPELL_ICON_PREFIX + SPELLS[select_spells[0]]['icon'])
 		spell1.visible = true
+		spell1Title.visible = true
+		spell1Title.text = SPELLS[select_spells[0]]['name']
 	if len(select_spells) >= 2:
 		spell2.texture = load(SPELL_ICON_PREFIX + SPELLS[select_spells[1]]['icon'])
 		spell2.visible = true
+		spell2Title.visible = true
+		spell2Title.text = SPELLS[select_spells[1]]['name']
 
 func add_spell(id):
 	if id in select_spells:
@@ -389,6 +410,14 @@ func death_spell():
 
 func mana_regen():
 	update_mana(25)
+	
+func spell_caster():
+	for key in SPELLS:
+		# Skip Spell Caster CD
+		if key == Vector3i(2, 3, 4):
+			continue
+		var timer:Timer = SPELLS[key]['timer']
+		timer.stop()
 
 func _on_animated_sprite_2d_animation_finished():
 	if casting_spell:
