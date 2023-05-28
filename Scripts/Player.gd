@@ -2,10 +2,12 @@ extends CharacterBody2D
 
 const PLAYER_MAX_HEALTH:float = 100.0
 const PLAYER_MAX_MANA:float = 100.0
+const GOD_SPEED_MOVEMENT:float = 80
 
 var input_direction:Vector2 = Vector2.ZERO;
+var god_speed_movement:float = 0
 
-@export var player_speed:float = 180.0
+@export var player_speed:float = 125.0
 @export var player_health:float = 100.0
 @export var player_mana:float = 100
 @export var player_gold:int = 0
@@ -28,12 +30,17 @@ var notifications = []
 
 @onready var spell1:TextureRect = $PlayerHUD/Control/SpellHud1/Spell1
 @onready var spell2:TextureRect = $PlayerHUD/Control/SpellHud2/Spell2
+
 @onready var spell1Title:Label = $PlayerHUD/Control/SpellHud1/Spell1Title
 @onready var spell2Title:Label = $PlayerHUD/Control/SpellHud2/Spell2Title
+
 @onready var spell1TimerLabel:Label = $PlayerHUD/Control/SpellHud1/Spell1/Spell1TimerLabel
 @onready var spell2TimerLabel:Label = $PlayerHUD/Control/SpellHud2/Spell2/Spell2TimerLabel
+@onready var spell3TimerLabel:Label = $PlayerHUD/Control/SpellHud3/Spell3/Spell3TimerLabel
+
 @onready var spell1Sweep:TextureProgressBar = $PlayerHUD/Control/SpellHud1/Spell1/Spell1Sweep
 @onready var spell2Sweep:TextureProgressBar = $PlayerHUD/Control/SpellHud2/Spell2/Spell2Sweep
+@onready var spell3Sweep:TextureProgressBar = $PlayerHUD/Control/SpellHud3/Spell3/Spell3Sweep
 
 
 var selected_orbs:Array = []
@@ -81,7 +88,7 @@ var SPELLS = {
 		"mana": 30,
 		"dmg": 69,
 		"cd": 8,
-		"timer": create_timer(8),
+		"timer": create_timer(8, _spell_timer_callback),
 		"scene": preload("res://Scenes/Spells/fire_blast.tscn"),
 		"distance": 150
 	},
@@ -93,9 +100,21 @@ var SPELLS = {
 		"mana": 10,
 		"dmg": 0,
 		"cd": 3.5,
-		"timer": create_timer(3.5),
+		"timer": create_timer(3.5, _spell_timer_callback),
 		"scene": preload("res://Scenes/Spells/earthen_gaurd.tscn"),
 		"distance": 65
+	},
+	Vector3i(1, 2, 2) : {
+		"id": Vector3i(1,2,2),
+		"name": "God Speed",
+		"icon": "Buffs/swiftness.png",
+		"function": god_speed,
+		"mana": 15,
+		"dmg": 0,
+		"cd": 5,
+		"timer": create_timer(5, _spell_timer_callback),
+		"scene": null,
+		"distance": 0
 	},
 	Vector3i(2, 2, 2) : {
 		"id": Vector3i(2,2,2),
@@ -105,7 +124,7 @@ var SPELLS = {
 		"mana": 2,
 		"dmg": 10,
 		"cd": 0.8,
-		"timer": create_timer(0.8),
+		"timer": create_timer(0.8, _spell_timer_callback),
 		"scene": preload("res://Scenes/Spells/wind_gush.tscn"),
 		"distance": 50
 	},
@@ -117,7 +136,7 @@ var SPELLS = {
 		"mana": 0,
 		"dmg": 0,
 		"cd": 2,
-		"timer": create_timer(2),
+		"timer": create_timer(2, _spell_timer_callback),
 		"scene": null,
 		"distance": 0
 	},
@@ -129,7 +148,7 @@ var SPELLS = {
 		"mana": 15,
 		"dmg": 35,
 		"cd": 3,
-		"timer": create_timer(3),
+		"timer": create_timer(3, _spell_timer_callback),
 		"scene": preload("res://Scenes/Spells/water_splash.tscn"),
 		"distance": 86
 	},
@@ -141,7 +160,7 @@ var SPELLS = {
 		"mana": 25,
 		"dmg": 0,
 		"cd": 20,
-		"timer": create_timer(20),
+		"timer": create_timer(20, _spell_timer_callback),
 		"scene": null,
 		"distance": 0
 	},
@@ -153,7 +172,7 @@ var SPELLS = {
 		"mana": 45,
 		"dmg": 350,
 		"cd": 35,
-		"timer": create_timer(35),
+		"timer": create_timer(35, _spell_timer_callback),
 		"scene": preload("res://Scenes/Spells/death.tscn"),
 		"distance": 120
 	}
@@ -184,6 +203,8 @@ func _ready():
 	
 	hud.visible = true
 	init_player_stats()
+	
+	god_speed_movement = 0
 
 
 func init_player_stats():
@@ -191,12 +212,12 @@ func init_player_stats():
 	update_mana(PLAYER_MAX_MANA)
 	update_gold(0)
 
-func create_timer(cd):
+func create_timer(cd, call_back):
 	var timer = Timer.new()
 	timer.one_shot = true
 	timer.wait_time = cd
 	timer.process_callback = Timer.TIMER_PROCESS_IDLE
-	timer.connect("timeout",  _timer_callback)
+	timer.connect("timeout",  call_back)
 	add_child(timer)
 	return timer
 
@@ -248,7 +269,7 @@ func animate_movement(direction:Vector2):
 
 func get_input():
 	input_direction = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down").normalized()
-	velocity = input_direction * player_speed
+	velocity = input_direction * (player_speed + god_speed_movement)
 	animate_movement(input_direction)
 
 func _physics_process(_delta):
@@ -256,6 +277,8 @@ func _physics_process(_delta):
 	move_and_slide()
 
 func _process(_delta):
+	draw_orbs()
+	draw_spells()
 	draw_spell_timer_ui()
 
 # Notification Stuff
@@ -292,7 +315,6 @@ func draw_orbs():
 func add_orb(idx):
 	selected_orbs.push_front(ORBS[idx])
 	selected_orbs = selected_orbs.slice(0, MAX_ORBS)
-	draw_orbs()
 
 # Elemnet Fusion
 
@@ -313,7 +335,6 @@ func add_spell(id):
 		return
 	select_spells.push_front(id)
 	select_spells = select_spells.slice(0, MAX_SPELS)
-	draw_spells()
 
 func fuse_element():
 	if len(selected_orbs) == 3:
@@ -418,6 +439,14 @@ func spell_caster():
 			continue
 		var timer:Timer = SPELLS[key]['timer']
 		timer.stop()
+		
+func god_speed():
+	god_speed_movement = GOD_SPEED_MOVEMENT
+	var timer = create_timer(4.5, _godspeed_timer_callback)
+	timer.start()
+
+func _godspeed_timer_callback():
+	god_speed_movement = 0
 
 func _on_animated_sprite_2d_animation_finished():
 	if casting_spell:
@@ -450,7 +479,7 @@ func draw_spell_timer_ui():
 		spell2Sweep.visible = false
 	
 
-func _timer_callback():
+func _spell_timer_callback():
 	if len(select_spells) >= 1 and get_spell_timer(0).time_left == 0:
 		spell1TimerLabel.visible = false
 		spell1Sweep.visible = false
