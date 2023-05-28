@@ -78,22 +78,70 @@ var SPELLS = {
 		"function": fire_blast,
 		"mana": 30,
 		"dmg": 69,
-		"cd": 5,
-		"timer": create_timer(5),
+		"cd": 8,
+		"timer": create_timer(8),
 		"scene": preload("res://Scenes/Spells/fire_blast.tscn"),
 		"distance": 150
 	},
 	Vector3i(1, 1, 1) : {
-		"id": Vector3i(0,0,0),
+		"id": Vector3i(1,1,1),
 		"name": "Earthen Gaurd",
 		"icon": "Buffs/knockback_resistance.png",
 		"function": earten_gaurd,
 		"mana": 10,
 		"dmg": 0,
-		"cd": 3,
-		"timer": create_timer(3),
+		"cd": 3.5,
+		"timer": create_timer(3.5),
 		"scene": preload("res://Scenes/Spells/earthen_gaurd.tscn"),
 		"distance": 65
+	},
+	Vector3i(2, 2, 2) : {
+		"id": Vector3i(2,2,2),
+		"name": "Wind Gush",
+		"icon": "Spells/frenzy_spell_(critical_booster).png",
+		"function": wind_gush,
+		"mana": 2,
+		"dmg": 10,
+		"cd": 0.8,
+		"timer": create_timer(0.8),
+		"scene": preload("res://Scenes/Spells/wind_gush.tscn"),
+		"distance": 50
+	},
+	Vector3i(2, 3, 3) : {
+		"id": Vector3i(2,3,3),
+		"name": "Mana Regen",
+		"icon": "Spells/mana_replenish.png",
+		"function": mana_regen,
+		"mana": 0,
+		"dmg": 0,
+		"cd": 2,
+		"timer": create_timer(2),
+		"scene": null,
+		"distance": 0
+	},
+	Vector3i(3, 3, 3) : {
+		"id": Vector3i(3,3,3),
+		"name": "Water Splash",
+		"icon": "Spells/water_spell.png",
+		"function": water_splash,
+		"mana": 15,
+		"dmg": 35,
+		"cd": 3,
+		"timer": create_timer(3),
+		"scene": preload("res://Scenes/Spells/water_splash.tscn"),
+		"distance": 86
+	},
+	Vector3i(4, 4, 4) : {
+		"id": Vector3i(3,3,3),
+		"name": "Death",
+		"icon": "Spells/summoning_spell.png",
+		"function": death_spell,
+		"mana": 45,
+		"dmg": 350,
+		"cd": 35,
+		"timer": create_timer(35),
+		"scene": preload("res://Scenes/Spells/death.tscn"),
+		"distance": 120
 	}
 }
 
@@ -148,6 +196,7 @@ func update_health(value):
 	player_health = min(player_health, PLAYER_MAX_HEALTH)
 	player_health = max(player_health, 0)
 	hp_bar.value = player_health
+
 
 func is_health_low():
 	return player_health < PLAYER_MAX_HEALTH
@@ -247,14 +296,19 @@ func add_spell(id):
 
 func fuse_element():
 	if len(selected_orbs) == 3:
-		var key = Vector3i(
-			selected_orbs[0]['id'],
+		var items = [selected_orbs[0]['id'],
 			selected_orbs[1]['id'],
 			selected_orbs[2]['id']
+		];
+		items.sort()
+		var key = Vector3i(
+			items[0],
+			items[1],
+			items[2],
 		)
 		if key in SPELLS:
 			add_spell(key)
-
+			
 # Spells
 
 func _input(event):
@@ -324,6 +378,18 @@ func fire_blast():
 func earten_gaurd():
 	aoe_summon_spell(Vector3i(1,1,1), true, Vector2(-2, 2))
 
+func wind_gush():
+	aoe_summon_spell(Vector3i(2,2,2), true, Vector2(-1, 1))
+
+func water_splash():
+	aoe_summon_spell(Vector3i(3,3,3), true, Vector2(-1, 1))
+
+func death_spell():
+	aoe_summon_spell(Vector3i(4,4,4), true, Vector2(-1, 1))
+
+func mana_regen():
+	update_mana(25)
+
 func _on_animated_sprite_2d_animation_finished():
 	if casting_spell:
 		casting_spell = false
@@ -331,11 +397,10 @@ func _on_animated_sprite_2d_animation_finished():
 
 func start_spell_cd(cd, idx):
 	# since there are 2 timers
-	if idx >= 0 and idx <= 1:
-		var timer = get_spell_timer(0)
-		if idx == 1:
-			timer = get_spell_timer(1)
-		timer.start(cd)
+	if idx == 0:
+		get_spell_timer(0).start(cd)
+	if idx == 1:
+		get_spell_timer(1).start(cd)
 		
 
 func draw_spell_timer_ui():
@@ -343,11 +408,17 @@ func draw_spell_timer_ui():
 		spell1TimerLabel.text = "%3.1f" % get_spell_timer(0).time_left
 		var cd = SPELLS[select_spells[0]]['cd']
 		spell1Sweep.value = int((get_spell_timer(0).time_left / cd) * 100)
+	elif len(select_spells) >= 1 and get_spell_timer(0).time_left == 0:
+		spell1TimerLabel.visible = false
+		spell1Sweep.visible = false
 		
 	if len(select_spells) >= 2 and get_spell_timer(1).time_left > 0:
 		spell2TimerLabel.text = "%3.1f" % get_spell_timer(1).time_left
 		var cd = SPELLS[select_spells[1]]['cd']
 		spell2Sweep.value = int((get_spell_timer(1).time_left / cd) * 100)
+	elif len(select_spells) >= 2 and get_spell_timer(1).time_left == 0:
+		spell2TimerLabel.visible = false
+		spell2Sweep.visible = false
 	
 
 func _timer_callback():

@@ -113,6 +113,7 @@ animations = [{
 size = Vector2(20, 27)
 
 [node name="EarthenGaurd" type="Area2D"]
+z_index = 20
 position = Vector2(5, -30)
 scale = Vector2(2, 2)
 script = ExtResource("1_yqb3n")

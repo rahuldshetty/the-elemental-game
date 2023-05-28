@@ -1,0 +1,78 @@
+[gd_scene load_steps=12 format=3 uid="uid://6pknkb3kancd"]
+
+[ext_resource type="Texture2D" uid="uid://c0yxph8s2a4ni" path="res://Sprites/spells/Air Burst.png" id="1_gm33a"]
+[ext_resource type="Script" path="res://Scripts/Spells/wind_gush.gd" id="1_td71t"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_utcif"]
+atlas = ExtResource("1_gm33a")
+region = Rect2(0, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kdwec"]
+atlas = ExtResource("1_gm33a")
+region = Rect2(48, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_x7x6h"]
+atlas = ExtResource("1_gm33a")
+region = Rect2(96, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wdtqe"]
+atlas = ExtResource("1_gm33a")
+region = Rect2(0, 48, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hyr88"]
+atlas = ExtResource("1_gm33a")
+region = Rect2(48, 48, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fcssk"]
+atlas = ExtResource("1_gm33a")
+region = Rect2(96, 48, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_sep3m"]
+atlas = ExtResource("1_gm33a")
+region = Rect2(0, 96, 48, 48)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_yak66"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_utcif")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kdwec")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_x7x6h")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_wdtqe")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hyr88")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fcssk")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_sep3m")
+}],
+"loop": false,
+"name": &"default",
+"speed": 5.0
+}]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_yin5v"]
+radius = 17.1172
+
+[node name="WindGush" type="Area2D"]
+z_index = 20
+script = ExtResource("1_td71t")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+sprite_frames = SubResource("SpriteFrames_yak66")
+autoplay = "default"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(2, 0)
+shape = SubResource("CircleShape2D_yin5v")
+
+[connection signal="animation_finished" from="AnimatedSprite2D" to="." method="_on_animated_sprite_2d_animation_finished"]
