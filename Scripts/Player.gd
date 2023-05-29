@@ -256,14 +256,17 @@ func update_gold(value):
 func update_xp(delta_xp):
 	PlayerVariables.xp += delta_xp
 	if PlayerVariables.xp >= PlayerVariables.LEVEL_UP_XP:
+		var old_max_hp = PlayerVariables.get_max_health()
+		
 		PlayerVariables.level += PlayerVariables.xp / PlayerVariables.LEVEL_UP_XP 
 		PlayerVariables.xp = PlayerVariables.xp % PlayerVariables.LEVEL_UP_XP
 		
-		var old_hp = PlayerVariables.player_health
-		update_health(PlayerVariables.get_max_health())
-		update_mana(PlayerVariables.get_max_mana())
+		var new_max_hp = PlayerVariables.get_max_health()
 		
-		if old_hp != PlayerVariables.player_health:
+		if old_max_hp != new_max_hp:
+			update_health(new_max_hp)
+			update_mana(PlayerVariables.get_max_mana())
+			
 			notify("Increased Player Health to {hp}".format(
 				{
 					"hp": PlayerVariables.player_health
@@ -313,6 +316,8 @@ func _process(_delta):
 	draw_orbs()
 	draw_spells()
 	draw_spell_timer_ui()
+	update_mana(0)
+	update_health(0)
 
 # Notification Stuff
 func notify(message):
