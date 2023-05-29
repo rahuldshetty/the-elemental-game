@@ -1,0 +1,22 @@
+[gd_scene load_steps=5 format=3 uid="uid://wukvry3fnb3i"]
+
+[ext_resource type="Script" path="res://Scripts/xp_item.gd" id="1_8rxjw"]
+[ext_resource type="Texture2D" uid="uid://dnx1700rouhby" path="res://Sprites/gui/spritesheet_16x16.png" id="1_k8078"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_of1xg"]
+atlas = ExtResource("1_k8078")
+region = Rect2(145.296, 47.6748, 13.2428, 16.4859)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_sfe7a"]
+radius = 15.0333
+
+[node name="XP" type="Area2D"]
+script = ExtResource("1_8rxjw")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = SubResource("AtlasTexture_of1xg")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_sfe7a")
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]
