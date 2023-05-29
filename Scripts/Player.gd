@@ -135,7 +135,8 @@ var SPELLS = {
 		"cd": 2,
 		"timer": create_timer(2, _spell_timer_callback),
 		"scene": null,
-		"distance": 0
+		"distance": 0,
+		"notify": "Regenerated mana!"
 	},
 	Vector3i(3, 3, 3) : {
 		"id": Vector3i(3,3,3),
@@ -214,7 +215,7 @@ func _ready():
 
 func init_player_stats():
 	update_health(-12)
-	update_mana(PlayerVariables.PLAYER_MAX_HEALTH)
+	update_mana(PlayerVariables.get_max_mana())
 	update_gold(0)
 
 func create_timer(cd, call_back):
@@ -236,17 +237,17 @@ func get_spell_timer(idx):
 
 func update_health(value):
 	PlayerVariables.player_health += value
-	PlayerVariables.player_health = min(PlayerVariables.player_health, PlayerVariables.PLAYER_MAX_HEALTH)
+	PlayerVariables.player_health = min(PlayerVariables.player_health, PlayerVariables.get_max_health())
 	PlayerVariables.player_health = max(PlayerVariables.player_health, 0)
 	hp_bar.value = PlayerVariables.player_health
-	hp_bar.max_value = PlayerVariables.PLAYER_MAX_HEALTH
+	hp_bar.max_value = PlayerVariables.get_max_health()
 
 
 func is_health_low():
-	return PlayerVariables.player_health < PlayerVariables.PLAYER_MAX_HEALTH
+	return PlayerVariables.player_health < PlayerVariables.get_max_health()
 	
 func is_mana_low():
-	return PlayerVariables.player_mana < PlayerVariables.PLAYER_MAX_MANA
+	return PlayerVariables.player_mana < PlayerVariables.get_max_mana()
 	
 func update_gold(value):
 	PlayerVariables.player_gold += value
@@ -255,18 +256,34 @@ func update_gold(value):
 func update_xp(delta_xp):
 	PlayerVariables.xp += delta_xp
 	if PlayerVariables.xp >= PlayerVariables.LEVEL_UP_XP:
-		PlayerVariables.xp = PlayerVariables.LEVEL_UP_XP - PlayerVariables.xp
-		PlayerVariables.level += 1
+		PlayerVariables.level += PlayerVariables.xp / PlayerVariables.LEVEL_UP_XP 
+		PlayerVariables.xp = PlayerVariables.xp % PlayerVariables.LEVEL_UP_XP
+		
+		var old_hp = PlayerVariables.player_health
+		update_health(PlayerVariables.get_max_health())
+		update_mana(PlayerVariables.get_max_mana())
+		
+		if old_hp != PlayerVariables.player_health:
+			notify("Increased Player Health to {hp}".format(
+				{
+					"hp": PlayerVariables.player_health
+				}
+			))
+			notify("Increased Player Mana to {mana}".format(
+				{
+					"mana": PlayerVariables.player_mana
+				}
+			))
 	$PlayerHUD/XP/XPProgressBar.value = PlayerVariables.xp
 	$PlayerHUD/XP/XPTexture/XPLabel.text = str(PlayerVariables.level)
 	
 	
 func update_mana(value):
 	PlayerVariables.player_mana += value
-	PlayerVariables.player_mana = min(PlayerVariables.player_mana, PlayerVariables.PLAYER_MAX_MANA)
+	PlayerVariables.player_mana = min(PlayerVariables.player_mana, PlayerVariables.get_max_mana())
 	PlayerVariables.player_mana = max(PlayerVariables.player_mana, 0)
 	mana_bar.value = PlayerVariables.player_mana
-	mana_bar.max_value = PlayerVariables.PLAYER_MAX_MANA
+	mana_bar.max_value = PlayerVariables.get_max_mana()
 
 func is_player_facing_left():
 	return animation.flip_h == true

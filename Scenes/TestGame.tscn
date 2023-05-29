@@ -65,8 +65,8 @@ xp = 1500
 
 [node name="XP3" parent="XP Group" instance=ExtResource("6_2c1g2")]
 position = Vector2(33, -50)
-xp = 3500
+xp = 5000
 
 [node name="XP4" parent="XP Group" instance=ExtResource("6_2c1g2")]
 position = Vector2(-40, -48)
-xp = 2500
+xp = 10000
