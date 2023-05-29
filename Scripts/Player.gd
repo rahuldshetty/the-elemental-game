@@ -5,6 +5,13 @@ var input_direction:Vector2 = Vector2.ZERO;
 const GOD_SPEED_MOVEMENT:float = 80
 var god_speed_movement:float = 0
 
+@onready var rand = RandomNumberGenerator.new()
+@onready var noise = FastNoiseLite.new()
+
+var noise_i: float = 0.0
+var shake_stregth  : float = 0.0
+var SHAKE_DECAY_RATE : float  = 5.0
+@onready var camera:Camera2D = $Camera2D
 
 @onready var hud:CanvasLayer = $PlayerHUD
 @onready var animation:AnimatedSprite2D = $AnimatedSprite2D
@@ -87,7 +94,11 @@ var SPELLS = {
 		"cd": 8,
 		"timer": create_timer(8, _spell_timer_callback),
 		"scene": preload("res://Scenes/Spells/fire_blast.tscn"),
-		"distance": 150
+		"distance": 150,
+		"camera_shake": {
+			"decay": 1.5,
+			"strength": 10.0
+		}
 	},
 	Vector3i(1, 1, 1) : {
 		"id": Vector3i(1,1,1),
@@ -99,7 +110,11 @@ var SPELLS = {
 		"cd": 3.5,
 		"timer": create_timer(3.5, _spell_timer_callback),
 		"scene": preload("res://Scenes/Spells/earthen_gaurd.tscn"),
-		"distance": 65
+		"distance": 65,
+		"camera_shake": {
+			"decay": 2.0,
+			"strength": 2.0
+		}
 	},
 	Vector3i(1, 2, 2) : {
 		"id": Vector3i(1,2,2),
@@ -123,7 +138,11 @@ var SPELLS = {
 		"cd": 0.8,
 		"timer": create_timer(0.8, _spell_timer_callback),
 		"scene": preload("res://Scenes/Spells/wind_gush.tscn"),
-		"distance": 50
+		"distance": 50,
+		"camera_shake": {
+			"decay": 3.5,
+			"strength": 3.0
+		}
 	},
 	Vector3i(2, 3, 3) : {
 		"id": Vector3i(2,3,3),
@@ -148,7 +167,11 @@ var SPELLS = {
 		"cd": 3,
 		"timer": create_timer(3, _spell_timer_callback),
 		"scene": preload("res://Scenes/Spells/water_splash.tscn"),
-		"distance": 86
+		"distance": 86,
+		"camera_shake": {
+			"decay": 3.5,
+			"strength": 3.0
+		}
 	},
 	Vector3i(2, 3, 4) : {
 		"id": Vector3i(2,3,4),
@@ -174,7 +197,11 @@ var SPELLS = {
 		"timer": create_timer(35, _spell_timer_callback),
 		"scene": preload("res://Scenes/Spells/death.tscn"),
 		"distance": 120,
-		"notify": "Summoning Death!"
+		"notify": "Summoning Death!",
+		"camera_shake": {
+			"decay": 1.5,
+			"strength": 5.0
+		}
 	}
 }
 
@@ -312,12 +339,14 @@ func _physics_process(_delta):
 	get_input()
 	move_and_slide()
 
-func _process(_delta):
+func _process(delta):
 	draw_orbs()
 	draw_spells()
 	draw_spell_timer_ui()
 	update_mana(0)
 	update_health(0)
+	
+	camera_shake(shake_stregth, delta)
 
 # Notification Stuff
 func notify(message):
@@ -397,7 +426,7 @@ func startSpell3Timer():
 
 # Spells
 
-func _input(event):
+func _input(_event):
 	if Input.is_action_just_pressed("fuse_element"):
 		fuse_element()
 	if Input.is_action_just_pressed("cast_spell"):
@@ -435,10 +464,16 @@ func cast_spell(idx):
 			update_mana(-mana)
 			start_spell_cd(cd, idx)
 			(SPELLS[select_spells[idx]]['function']).call()
+			
+			var spell = SPELLS[select_spells[idx]]
 			if 'notify' in SPELLS[select_spells[idx]]:
 				notify(SPELLS[select_spells[idx]]['notify'])
+			if 'camera_shake' in SPELLS[select_spells[idx]]:
+				apply_camera_shake(
+					spell['camera_shake']['strength'],
+					spell['camera_shake']['decay']
+				)
 
-		
 func cast_spell_animation():
 	animation.play("spell")
 	casting_spell = true
@@ -550,4 +585,22 @@ func _spell_timer_callback():
 func _on_spell_3_timer_timeout():
 	spell3TimerLabel.visible = false
 	spell3Sweep.visible = false
+
+func get_noise_offset(strength, delta: float) -> Vector2:
+	noise_i += delta * 30.0
+	# Set the x values of each call to 'get_noise_2d' to a different value
+	# so that our x and y vectors will be reading from unrelated areas of noise
+	return Vector2(
+		noise.get_noise_2d(1, noise_i) * strength,
+		noise.get_noise_2d(100, noise_i) * strength
+	)
 	
+func camera_shake(strength, delta:float):
+	rand.randomize()
+	noise.seed = rand.randi()
+	shake_stregth = lerpf(strength, 0, SHAKE_DECAY_RATE * delta )
+	camera.offset = get_noise_offset(strength, delta)
+
+func apply_camera_shake(str, decay):
+	shake_stregth = str
+	SHAKE_DECAY_RATE = decay
