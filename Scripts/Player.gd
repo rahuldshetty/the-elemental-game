@@ -1,16 +1,10 @@
 extends CharacterBody2D
 
-const PLAYER_MAX_HEALTH:float = 100.0
-const PLAYER_MAX_MANA:float = 100.0
-const GOD_SPEED_MOVEMENT:float = 80
-
 var input_direction:Vector2 = Vector2.ZERO;
+
+const GOD_SPEED_MOVEMENT:float = 80
 var god_speed_movement:float = 0
 
-@export var player_speed:float = 125.0
-@export var player_health:float = 100.0
-@export var player_mana:float = 100
-@export var player_gold:int = 0
 
 @onready var hud:CanvasLayer = $PlayerHUD
 @onready var animation:AnimatedSprite2D = $AnimatedSprite2D
@@ -24,6 +18,8 @@ var notifications = []
 @onready var player_notif_timer:Timer = $PlayerHUD/PlayerNotification/PlayerNotificationTimer
 
 # Spells
+const CHANT_SPELL_CD:float = 0.35
+
 @onready var orb1:TextureRect = $GamicHUD/Orb1
 @onready var orb2:TextureRect = $GamicHUD/Orb2
 @onready var orb3:TextureRect = $GamicHUD/Orb3
@@ -42,6 +38,7 @@ var notifications = []
 @onready var spell2Sweep:TextureProgressBar = $PlayerHUD/Control/SpellHud2/Spell2/Spell2Sweep
 @onready var spell3Sweep:TextureProgressBar = $PlayerHUD/Control/SpellHud3/Spell3/Spell3Sweep
 
+@onready var spell3Timer:Timer = $PlayerHUD/Control/SpellHud3/Spell3/Spell3Timer
 
 var selected_orbs:Array = []
 const MAX_ORBS = 3
@@ -162,7 +159,8 @@ var SPELLS = {
 		"cd": 20,
 		"timer": create_timer(20, _spell_timer_callback),
 		"scene": null,
-		"distance": 0
+		"distance": 0,
+		"notify": "Reset spell cooldown!"
 	},
 	Vector3i(4, 4, 4) : {
 		"id": Vector3i(3,3,3),
@@ -174,7 +172,8 @@ var SPELLS = {
 		"cd": 35,
 		"timer": create_timer(35, _spell_timer_callback),
 		"scene": preload("res://Scenes/Spells/death.tscn"),
-		"distance": 120
+		"distance": 120,
+		"notify": "Summoning Death!"
 	}
 }
 
@@ -201,15 +200,21 @@ func _ready():
 	spell1Title.visible = false
 	spell2Title.visible = false
 	
+	$GodSpeedFX.visible = false
+	$GodSpeedFX.emitting = false
+	
 	hud.visible = true
 	init_player_stats()
 	
 	god_speed_movement = 0
+	
+	$PlayerHUD/XP/XPProgressBar.max_value = PlayerVariables.LEVEL_UP_XP
+	update_xp(0)
 
 
 func init_player_stats():
 	update_health(-12)
-	update_mana(PLAYER_MAX_MANA)
+	update_mana(PlayerVariables.PLAYER_MAX_HEALTH)
 	update_gold(0)
 
 func create_timer(cd, call_back):
@@ -230,27 +235,38 @@ func get_spell_timer(idx):
 		return SPELLS[key]['timer']
 
 func update_health(value):
-	player_health += value
-	player_health = min(player_health, PLAYER_MAX_HEALTH)
-	player_health = max(player_health, 0)
-	hp_bar.value = player_health
+	PlayerVariables.player_health += value
+	PlayerVariables.player_health = min(PlayerVariables.player_health, PlayerVariables.PLAYER_MAX_HEALTH)
+	PlayerVariables.player_health = max(PlayerVariables.player_health, 0)
+	hp_bar.value = PlayerVariables.player_health
+	hp_bar.max_value = PlayerVariables.PLAYER_MAX_HEALTH
 
 
 func is_health_low():
-	return player_health < PLAYER_MAX_HEALTH
+	return PlayerVariables.player_health < PlayerVariables.PLAYER_MAX_HEALTH
 	
 func is_mana_low():
-	return player_mana < PLAYER_MAX_MANA
+	return PlayerVariables.player_mana < PlayerVariables.PLAYER_MAX_MANA
 	
 func update_gold(value):
-	player_gold += value
-	gold_label.text = str(player_gold)
+	PlayerVariables.player_gold += value
+	gold_label.text = str(PlayerVariables.player_gold)
+	
+func update_xp(delta_xp):
+	PlayerVariables.xp += delta_xp
+	if PlayerVariables.xp >= PlayerVariables.LEVEL_UP_XP:
+		PlayerVariables.xp = PlayerVariables.LEVEL_UP_XP - PlayerVariables.xp
+		PlayerVariables.level += 1
+	$PlayerHUD/XP/XPProgressBar.value = PlayerVariables.xp
+	$PlayerHUD/XP/XPTexture/XPLabel.text = str(PlayerVariables.level)
+	
 	
 func update_mana(value):
-	player_mana += value
-	player_mana = min(player_mana, PLAYER_MAX_MANA)
-	player_mana = max(player_mana, 0)
-	mana_bar.value = player_mana
+	PlayerVariables.player_mana += value
+	PlayerVariables.player_mana = min(PlayerVariables.player_mana, PlayerVariables.PLAYER_MAX_MANA)
+	PlayerVariables.player_mana = max(PlayerVariables.player_mana, 0)
+	mana_bar.value = PlayerVariables.player_mana
+	mana_bar.max_value = PlayerVariables.PLAYER_MAX_MANA
 
 func is_player_facing_left():
 	return animation.flip_h == true
@@ -269,7 +285,7 @@ func animate_movement(direction:Vector2):
 
 func get_input():
 	input_direction = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down").normalized()
-	velocity = input_direction * (player_speed + god_speed_movement)
+	velocity = input_direction * (PlayerVariables.player_speed + god_speed_movement)
 	animate_movement(input_direction)
 
 func _physics_process(_delta):
@@ -349,8 +365,14 @@ func fuse_element():
 			items[2],
 		)
 		if key in SPELLS:
+			startSpell3Timer()
 			add_spell(key)
-			
+
+func startSpell3Timer():
+	spell3Timer.start()
+	spell3TimerLabel.visible = true
+	spell3Sweep.visible = true
+
 # Spells
 
 func _input(event):
@@ -387,10 +409,12 @@ func cast_spell(idx):
 		
 		var mana = SPELLS[select_spells[idx]]['mana']
 		var cd = SPELLS[select_spells[idx]]['cd']
-		if player_mana >= mana:
+		if PlayerVariables.player_mana >= mana:
 			update_mana(-mana)
 			start_spell_cd(cd, idx)
 			(SPELLS[select_spells[idx]]['function']).call()
+			if 'notify' in SPELLS[select_spells[idx]]:
+				notify(SPELLS[select_spells[idx]]['notify'])
 
 		
 func cast_spell_animation():
@@ -442,11 +466,16 @@ func spell_caster():
 		
 func god_speed():
 	god_speed_movement = GOD_SPEED_MOVEMENT
+	$GodSpeedFX.emitting = true
+	$GodSpeedFX.visible = true
 	var timer = create_timer(4.5, _godspeed_timer_callback)
 	timer.start()
 
 func _godspeed_timer_callback():
 	god_speed_movement = 0
+	$GodSpeedFX.emitting = false
+	$GodSpeedFX.visible = false
+
 
 func _on_animated_sprite_2d_animation_finished():
 	if casting_spell:
@@ -462,6 +491,7 @@ func start_spell_cd(cd, idx):
 		
 
 func draw_spell_timer_ui():
+	# Spell1
 	if len(select_spells) >= 1 and get_spell_timer(0).time_left > 0:
 		spell1TimerLabel.text = "%3.1f" % get_spell_timer(0).time_left
 		var cd = SPELLS[select_spells[0]]['cd']
@@ -470,6 +500,7 @@ func draw_spell_timer_ui():
 		spell1TimerLabel.visible = false
 		spell1Sweep.visible = false
 		
+	# Spell2
 	if len(select_spells) >= 2 and get_spell_timer(1).time_left > 0:
 		spell2TimerLabel.text = "%3.1f" % get_spell_timer(1).time_left
 		var cd = SPELLS[select_spells[1]]['cd']
@@ -478,6 +509,13 @@ func draw_spell_timer_ui():
 		spell2TimerLabel.visible = false
 		spell2Sweep.visible = false
 	
+	# Spell3
+	if spell3Timer.time_left > 0:
+		spell3TimerLabel.text = "%3.1f" % spell3Timer.time_left
+		spell3Sweep.value = int((spell3Timer.time_left / CHANT_SPELL_CD) * 100)
+	elif spell3Timer.time_left == 0:
+		spell3TimerLabel.visible = false
+		spell3Sweep.visible = false
 
 func _spell_timer_callback():
 	if len(select_spells) >= 1 and get_spell_timer(0).time_left == 0:
@@ -487,4 +525,7 @@ func _spell_timer_callback():
 		spell2TimerLabel.visible = false
 		spell2Sweep.visible = false
 
-
+func _on_spell_3_timer_timeout():
+	spell3TimerLabel.visible = false
+	spell3Sweep.visible = false
+	
