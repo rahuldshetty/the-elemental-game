@@ -198,7 +198,7 @@ radius = 118.0
 [sub_resource type="CircleShape2D" id="CircleShape2D_caq8x"]
 radius = 25.0799
 
-[node name="PlagueDoctor" type="CharacterBody2D"]
+[node name="PlagueDoctor" type="CharacterBody2D" groups=["enemy"]]
 z_index = 8
 collision_mask = 0
 script = ExtResource("1_ua8bf")

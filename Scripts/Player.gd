@@ -95,7 +95,7 @@ var SPELLS = {
 		"icon": "Spells/fire_spell.png",
 		"function": fire_blast,
 		"mana": 30,
-		"dmg": 69,
+		"dmg": 45,
 		"cd": 8,
 		"timer": create_timer(8, _spell_timer_callback),
 		"scene": preload("res://Scenes/Spells/fire_blast.tscn"),
@@ -111,7 +111,7 @@ var SPELLS = {
 		"icon": "Buffs/knockback_resistance.png",
 		"function": earten_gaurd,
 		"mana": 10,
-		"dmg": 0,
+		"dmg": 15,
 		"cd": 3.5,
 		"timer": create_timer(3.5, _spell_timer_callback),
 		"scene": preload("res://Scenes/Spells/earthen_gaurd.tscn"),
@@ -139,7 +139,7 @@ var SPELLS = {
 		"icon": "Spells/frenzy_spell_(critical_booster).png",
 		"function": wind_gush,
 		"mana": 2,
-		"dmg": 10,
+		"dmg": 8,
 		"cd": 0.8,
 		"timer": create_timer(0.8, _spell_timer_callback),
 		"scene": preload("res://Scenes/Spells/wind_gush.tscn"),
@@ -168,7 +168,7 @@ var SPELLS = {
 		"icon": "Spells/water_spell.png",
 		"function": water_splash,
 		"mana": 15,
-		"dmg": 35,
+		"dmg": 25,
 		"cd": 3,
 		"timer": create_timer(3, _spell_timer_callback),
 		"scene": preload("res://Scenes/Spells/water_splash.tscn"),
@@ -197,7 +197,7 @@ var SPELLS = {
 		"icon": "Spells/summoning_spell.png",
 		"function": death_spell,
 		"mana": 45,
-		"dmg": 350,
+		"dmg": 123,
 		"cd": 35,
 		"timer": create_timer(35, _spell_timer_callback),
 		"scene": preload("res://Scenes/Spells/death.tscn"),
@@ -507,9 +507,17 @@ func cast_spell_animation():
 func aoe_summon_spell(idx, flip_h=false, scale_value=Vector2(1, 1)):
 	var spell = SPELLS[idx]
 	var scene = spell['scene']
+	var dmg:int = spell['dmg']
+	
 	cast_spell_animation()
+	
 	var aoe_spell:Area2D = scene.instantiate()
+	
+	if dmg != 0:
+		aoe_spell.dmg = dmg
+	
 	aoe_spell.position = global_position
+	
 	if is_player_facing_left():
 		aoe_spell.position.x -= spell['distance']
 	else:

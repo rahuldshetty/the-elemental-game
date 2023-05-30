@@ -51,6 +51,7 @@ func _process(_delta):
 
 func take_damage(value):
 	hp -= value
+	state = TAKE_DMG
 	if hp <= 0:
 		died = true
 		state = DEATH
@@ -103,3 +104,4 @@ func _on_animated_sprite_2d_animation_finished():
 	if died:
 		# Drop Items
 		queue_free()
+	state = FOLLOW_PLAYER
