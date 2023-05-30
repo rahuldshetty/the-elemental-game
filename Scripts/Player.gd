@@ -11,6 +11,11 @@ var god_speed_movement:float = 0
 var noise_i: float = 0.0
 var shake_stregth  : float = 0.0
 var SHAKE_DECAY_RATE : float  = 5.0
+
+const DEATH_CAMERA_SHAKE_STR : float = 2.0
+const DEATH_CAMERA_SHAKE_DELAY : float = 1.5
+
+
 @onready var camera:Camera2D = $Camera2D
 
 @onready var hud:CanvasLayer = $PlayerHUD
@@ -206,6 +211,7 @@ var SPELLS = {
 }
 
 var casting_spell = false
+var taking_dmg = false
 
 func _ready():
 	animation.play("idle")
@@ -263,6 +269,16 @@ func get_spell_timer(idx):
 		return SPELLS[key]['timer']
 
 func update_health(value):
+	if value < 0:
+		taking_dmg = true
+		animation.play("take_damage")
+		
+	if not PlayerVariables.died and PlayerVariables.player_health <= 0:
+		camera_shake(DEATH_CAMERA_SHAKE_STR, DEATH_CAMERA_SHAKE_DELAY)
+		taking_dmg = false
+		PlayerVariables.died = true
+		animation.play("death")
+		
 	PlayerVariables.player_health += value
 	PlayerVariables.player_health = min(PlayerVariables.player_health, PlayerVariables.get_max_health())
 	PlayerVariables.player_health = max(PlayerVariables.player_health, 0)
@@ -327,10 +343,12 @@ func animate_movement(direction:Vector2):
 		elif direction.x < 0:
 			animation.flip_h = true
 	else:
-		if not casting_spell:
+		if not casting_spell and not taking_dmg and not PlayerVariables.died:
 			animation.play("idle")
 
 func get_input():
+	if PlayerVariables.died:
+		return
 	input_direction = Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down").normalized()
 	velocity = input_direction * (PlayerVariables.player_speed + god_speed_movement)
 	animate_movement(input_direction)
@@ -346,6 +364,7 @@ func _process(delta):
 	update_mana(0)
 	update_health(0)
 	
+	# Camera FX
 	camera_shake(shake_stregth, delta)
 
 # Notification Stuff
@@ -369,6 +388,11 @@ func get_orb_draw_region(x):
 	return Rect2(x, 580, 32, 28)
 
 func draw_orbs():
+	if PlayerVariables.died:
+		orb1.visible = false
+		orb2.visible = false 
+		orb3.visible = false 
+		return
 	if len(selected_orbs) >= 1:
 		orb1.texture.region = get_orb_draw_region(selected_orbs[0]['x'])
 		orb1.visible = true
@@ -427,6 +451,8 @@ func startSpell3Timer():
 # Spells
 
 func _input(_event):
+	if PlayerVariables.died:
+		return
 	if Input.is_action_just_pressed("fuse_element"):
 		fuse_element()
 	if Input.is_action_just_pressed("cast_spell"):
@@ -535,8 +561,13 @@ func _godspeed_timer_callback():
 
 
 func _on_animated_sprite_2d_animation_finished():
+	if PlayerVariables.died:
+		return
 	if casting_spell:
 		casting_spell = false
+		animation.play("idle")
+	if taking_dmg:
+		taking_dmg = false
 		animation.play("idle")
 
 func start_spell_cd(cd, idx):
@@ -601,6 +632,12 @@ func camera_shake(strength, delta:float):
 	shake_stregth = lerpf(strength, 0, SHAKE_DECAY_RATE * delta )
 	camera.offset = get_noise_offset(strength, delta)
 
-func apply_camera_shake(str, decay):
-	shake_stregth = str
+func apply_camera_shake(strength, decay):
+	shake_stregth = strength
 	SHAKE_DECAY_RATE = decay
+
+func _on_hit_box_body_entered(body):
+	pass # Replace with function body.
+
+func _on_hit_box_body_exited(body):
+	pass # Replace with function body.

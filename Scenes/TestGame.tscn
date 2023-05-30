@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://bwhc1wv0dy8hs"]
+[gd_scene load_steps=8 format=3 uid="uid://bwhc1wv0dy8hs"]
 
 [ext_resource type="PackedScene" uid="uid://cit16souudw4g" path="res://Scenes/Player.tscn" id="1_3alie"]
 [ext_resource type="PackedScene" uid="uid://cp6xijpqaths0" path="res://Scenes/World.tscn" id="2_jd1yu"]
@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://lhw50ub7i21w" path="res://Scenes/Mana_Potion.tscn" id="4_l1iya"]
 [ext_resource type="PackedScene" uid="uid://db6vy4d4gqv4m" path="res://Scenes/items/coin.tscn" id="5_bm0tc"]
 [ext_resource type="PackedScene" uid="uid://wukvry3fnb3i" path="res://Scenes/items/xp.tscn" id="6_2c1g2"]
+[ext_resource type="PackedScene" uid="uid://dosof2lj42ccn" path="res://Scenes/enemy/plague_doctor.tscn" id="7_b7rnp"]
 
 [node name="TestGame" type="Node2D"]
 
@@ -70,3 +71,9 @@ xp = 5000
 [node name="XP4" parent="XP Group" instance=ExtResource("6_2c1g2")]
 position = Vector2(-40, -48)
 xp = 10000
+
+[node name="EnemyAI" type="Node2D" parent="."]
+position = Vector2(539, -223)
+
+[node name="PlagueDoctor" parent="EnemyAI" instance=ExtResource("7_b7rnp")]
+position = Vector2(-57, 0)

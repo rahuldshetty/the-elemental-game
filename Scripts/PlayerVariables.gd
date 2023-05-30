@@ -3,6 +3,8 @@ extends Node
 var PLAYER_MAX_HEALTH:float = 100.0
 var PLAYER_MAX_MANA:float = 100.0
 
+var died:bool = false
+
 var player_speed:float = 125.0
 var player_health:float = PLAYER_MAX_HEALTH
 var player_mana:float = PLAYER_MAX_MANA
