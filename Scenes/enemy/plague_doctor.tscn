@@ -136,7 +136,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_yj42p")
 }],
-"loop": true,
+"loop": false,
 "name": &"death",
 "speed": 5.0
 }, {
@@ -167,7 +167,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_iajot")
 }],
-"loop": true,
+"loop": false,
 "name": &"take_damage",
 "speed": 5.0
 }, {
@@ -205,7 +205,7 @@ script = ExtResource("1_ua8bf")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
 sprite_frames = SubResource("SpriteFrames_ydab6")
-animation = &"attack"
+animation = &"idle"
 autoplay = "idle"
 
 [node name="collider" type="CollisionShape2D" parent="."]
@@ -227,6 +227,7 @@ shape = SubResource("CircleShape2D_caq8x")
 [node name="AttackCD" type="Timer" parent="."]
 wait_time = 0.6
 
+[connection signal="animation_finished" from="AnimatedSprite2D" to="." method="_on_animated_sprite_2d_animation_finished"]
 [connection signal="body_entered" from="detection_area" to="." method="_on_detection_area_body_entered"]
 [connection signal="body_exited" from="detection_area" to="." method="_on_detection_area_body_exited"]
 [connection signal="body_entered" from="HitBox" to="." method="_on_hit_box_body_entered"]

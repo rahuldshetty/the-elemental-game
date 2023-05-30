@@ -6,7 +6,6 @@ extends CharacterBody2D
 
 
 
-
 @onready var animation = $AnimatedSprite2D
 @onready var attack_timer = $AttackCD
 
@@ -18,6 +17,7 @@ enum {
 	DEATH
 }
 
+var died = false
 var state = IDLE
 var player_in_range = false
 var target = null;
@@ -48,14 +48,14 @@ func _process(_delta):
 			animation.play("take_damage")
 		DEATH:
 			animation.play("death")
-			queue_free()
 
 func take_damage(value):
 	hp -= value
 	if hp <= 0:
+		died = true
 		state = DEATH
 
-func _physics_process(delta):
+func _physics_process(_delta):
 	match state:
 		FOLLOW_PLAYER:
 			direction = (target.global_position - global_position).normalized()
@@ -98,3 +98,8 @@ func _on_attack_cd_timeout():
 	if player_in_range and not PlayerVariables.died:
 		attack_player()
 
+
+func _on_animated_sprite_2d_animation_finished():
+	if died:
+		# Drop Items
+		queue_free()
