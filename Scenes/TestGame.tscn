@@ -76,4 +76,10 @@ xp = 10000
 position = Vector2(539, -223)
 
 [node name="PlagueDoctor" parent="EnemyAI" instance=ExtResource("7_b7rnp")]
-position = Vector2(-57, 0)
+position = Vector2(-57, -1)
+
+[node name="PlagueDoctor2" parent="EnemyAI" instance=ExtResource("7_b7rnp")]
+position = Vector2(24, 120)
+SPEED = 80.0
+hp = 20.0
+attack_damage = 5

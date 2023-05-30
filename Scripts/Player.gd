@@ -534,6 +534,7 @@ func water_splash():
 	aoe_summon_spell(Vector3i(3,3,3), true, Vector2(-1, 1))
 
 func death_spell():
+	update_health(-PlayerVariables.player_health / 2)
 	aoe_summon_spell(Vector3i(4,4,4), true, Vector2(-1, 1))
 
 func mana_regen():
