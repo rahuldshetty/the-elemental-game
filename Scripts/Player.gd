@@ -644,9 +644,3 @@ func camera_shake(strength, delta:float):
 func apply_camera_shake(strength, decay):
 	shake_stregth = strength
 	SHAKE_DECAY_RATE = decay
-
-func _on_hit_box_body_entered(body):
-	pass # Replace with function body.
-
-func _on_hit_box_body_exited(body):
-	pass # Replace with function body.

@@ -60,6 +60,8 @@ func _physics_process(_delta):
 		return
 	match state:
 		FOLLOW_PLAYER:
+			if not target:
+				return
 			direction = (target.global_position - global_position).normalized()
 			velocity=direction*SPEED
 			move_and_slide()

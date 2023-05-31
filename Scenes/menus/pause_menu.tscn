@@ -1,0 +1,178 @@
+[gd_scene load_steps=10 format=3 uid="uid://cyeyex6t7mmb1"]
+
+[ext_resource type="Texture2D" uid="uid://cbwysr46msphu" path="res://Sprites/gui/GUI.png" id="1_8si68"]
+[ext_resource type="Script" path="res://Scripts/menu/pause_menu.gd" id="1_xyf3i"]
+[ext_resource type="FontFile" uid="uid://cxt6sqemyvl3v" path="res://Fonts/monogram-extended.ttf" id="2_hwnfu"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_q8yyw"]
+atlas = ExtResource("1_8si68")
+region = Rect2(1.71534, 33.689, 45.4849, 43.8499)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vuf2m"]
+atlas = ExtResource("1_8si68")
+region = Rect2(112, 80, 32, 15)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_x3lw8"]
+atlas = ExtResource("1_8si68")
+region = Rect2(112, 96, 32, 15)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_axvqw"]
+atlas = ExtResource("1_8si68")
+region = Rect2(0, 80, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rrhvd"]
+atlas = ExtResource("1_8si68")
+region = Rect2(16, 80, 16, 16)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_3x35s"]
+atlas = ExtResource("1_8si68")
+region = Rect2(100.106, 83.4042, 7.56731, 9.18887)
+
+[node name="PauseMenu" type="CanvasLayer"]
+script = ExtResource("1_xyf3i")
+
+[node name="TextureRect" type="TextureRect" parent="."]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -203.0
+offset_top = -206.0
+offset_right = 204.0
+offset_bottom = 229.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = SubResource("AtlasTexture_q8yyw")
+
+[node name="Resume" type="TextureButton" parent="TextureRect"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -124.0
+offset_top = -156.5
+offset_right = 118.0
+offset_bottom = -57.5
+grow_horizontal = 2
+grow_vertical = 2
+texture_normal = SubResource("AtlasTexture_vuf2m")
+texture_pressed = SubResource("AtlasTexture_x3lw8")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="Label" type="Label" parent="TextureRect/Resume"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -2.0
+offset_bottom = -2.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_fonts/font = ExtResource("2_hwnfu")
+theme_override_font_sizes/font_size = 72
+text = "RESUME"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Menu" type="TextureButton" parent="TextureRect"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -124.0
+offset_top = -44.5
+offset_right = 118.0
+offset_bottom = 54.5
+grow_horizontal = 2
+grow_vertical = 2
+texture_normal = SubResource("AtlasTexture_vuf2m")
+texture_pressed = SubResource("AtlasTexture_x3lw8")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="Label" type="Label" parent="TextureRect/Menu"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -2.0
+offset_bottom = -2.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_fonts/font = ExtResource("2_hwnfu")
+theme_override_font_sizes/font_size = 72
+text = "Menu"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Quit" type="TextureButton" parent="TextureRect"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -124.0
+offset_top = 64.5
+offset_right = 118.0
+offset_bottom = 163.5
+grow_horizontal = 2
+grow_vertical = 2
+texture_normal = SubResource("AtlasTexture_vuf2m")
+texture_pressed = SubResource("AtlasTexture_x3lw8")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="Label" type="Label" parent="TextureRect/Quit"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -2.0
+offset_bottom = -2.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_fonts/font = ExtResource("2_hwnfu")
+theme_override_font_sizes/font_size = 72
+text = "QUIT"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="PauseButton" type="TextureButton" parent="."]
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -76.0
+offset_top = 16.0
+offset_right = -23.0
+offset_bottom = 68.0
+grow_horizontal = 0
+texture_normal = SubResource("AtlasTexture_axvqw")
+texture_pressed = SubResource("AtlasTexture_rrhvd")
+stretch_mode = 0
+
+[node name="TextureRect" type="TextureRect" parent="PauseButton"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -12.5
+offset_top = -15.0
+offset_right = 11.5
+offset_bottom = 11.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = SubResource("AtlasTexture_3x35s")
+
+[connection signal="pressed" from="TextureRect/Resume" to="." method="_on_resume_pressed"]
+[connection signal="pressed" from="TextureRect/Menu" to="." method="_on_menu_pressed"]
+[connection signal="pressed" from="TextureRect/Quit" to="." method="_on_quit_pressed"]
+[connection signal="pressed" from="PauseButton" to="." method="_on_pause_button_pressed"]
