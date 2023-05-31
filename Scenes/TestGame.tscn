@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://bwhc1wv0dy8hs"]
+[gd_scene load_steps=11 format=3 uid="uid://bwhc1wv0dy8hs"]
 
 [ext_resource type="PackedScene" uid="uid://cit16souudw4g" path="res://Scenes/Player.tscn" id="1_3alie"]
 [ext_resource type="Script" path="res://Scripts/TestGame.gd" id="1_wqg4j"]
@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" uid="uid://wukvry3fnb3i" path="res://Scenes/items/xp.tscn" id="6_2c1g2"]
 [ext_resource type="PackedScene" uid="uid://dosof2lj42ccn" path="res://Scenes/enemy/plague_doctor.tscn" id="7_b7rnp"]
 [ext_resource type="PackedScene" uid="uid://cyeyex6t7mmb1" path="res://Scenes/menus/pause_menu.tscn" id="8_mtrbw"]
+[ext_resource type="PackedScene" uid="uid://dj8mkg7m26h8k" path="res://Scenes/menus/death_menu.tscn" id="10_u8lxv"]
 
 [node name="TestGame" type="Node2D"]
 script = ExtResource("1_wqg4j")
@@ -89,4 +90,7 @@ hp = 200.0
 attack_damage = 5
 
 [node name="PauseMenu" parent="." instance=ExtResource("8_mtrbw")]
+visible = false
+
+[node name="DeathMenu" parent="." instance=ExtResource("10_u8lxv")]
 visible = false

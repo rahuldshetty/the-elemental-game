@@ -363,6 +363,7 @@ func _process(delta):
 	draw_spell_timer_ui()
 	update_mana(0)
 	update_health(0)
+	update_gold(0)
 	
 	# Camera FX
 	camera_shake(shake_stregth, delta)
