@@ -5,7 +5,6 @@ extends CharacterBody2D
 @export var attack_damage:int = 15
 
 
-
 @onready var animation = $AnimatedSprite2D
 @onready var attack_timer = $AttackCD
 
@@ -57,6 +56,8 @@ func take_damage(value):
 		state = DEATH
 
 func _physics_process(_delta):
+	if died:
+		return
 	match state:
 		FOLLOW_PLAYER:
 			direction = (target.global_position - global_position).normalized()

@@ -10,7 +10,9 @@ config_version=5
 
 [application]
 
-config/name="Elemental"
+config/name="The Elemental Game"
+config/description="Venture on a adventure, to find allies, make some enemies and hunt for the secret relics that will unlock the potential power. Use your secret sorcery to change the outcome of the world."
+run/main_scene="res://Scenes/menus/main_menu.tscn"
 config/features=PackedStringArray("4.0", "GL Compatibility")
 config/icon="res://icon.svg"
 
